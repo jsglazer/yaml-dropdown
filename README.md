@@ -38,9 +38,13 @@ Folder patterns are JavaScript regular expressions tested against the *parent fo
 | `^Projects` | `Projects`, `Projects/Alpha`, `ProjectsArchive` |
 | `^Projects(/\|$)` | `Projects`, `Projects/Alpha` — but not `ProjectsArchive` |
 | `^$` | The vault root only |
+| `Classes/.*/.*/HW$` | `Classes/2026-B/Econ - PUBP 720/HW` — any two folder levels between `Classes` and a trailing `HW` |
+| `HW$` | Any folder whose path ends in `HW`, at any depth |
 | *(empty)* | Every folder |
 
 An invalid pattern is reported inline under the field and the rule is skipped. It never throws and never breaks the settings tab.
+
+> **`*` is not a wildcard.** In regex, `*` means "zero or more of the character right before it," not "any characters." `Classes/*/*/HW/` will *not* match `Classes/2026-B/Econ - PUBP 720/HW` — use `.*` (any characters) instead of a bare `*`, and remember the folder path has no trailing slash to match against.
 
 ### DropdownClass
 
