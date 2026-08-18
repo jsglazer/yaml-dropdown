@@ -1,0 +1,32 @@
+.yaml-dropdown-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-4-4);
+	padding-bottom: var(--size-4-2);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.yaml-dropdown-version {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.yaml-dropdown-rule {
+	margin-bottom: var(--size-4-4);
+	padding: 0 var(--size-4-3);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+}
+
+.yaml-dropdown-error:not(:empty) {
+	margin: 0 0 var(--size-4-3) 0;
+	color: var(--text-error);
+	font-size: var(--font-ui-small);
+}
+
+.yaml-dropdown-empty {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}

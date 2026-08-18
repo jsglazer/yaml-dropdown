@@ -1,0 +1,10 @@
+{
+	"id": "yaml-dropdown",
+	"name": "YAML Dropdown",
+	"version": "1.0.0",
+	"minAppVersion": "1.5.12",
+	"description": "Offers a dropdown of predefined values after the colon in a frontmatter key, scoped per folder, per file, or by DropdownClass.",
+	"author": "Josh Glazer",
+	"authorUrl": "https://github.com/jsglazer",
+	"isDesktopOnly": false
+}
