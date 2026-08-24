@@ -63,11 +63,14 @@ Status: Reading
 
 Each rule has:
 
+- **Label** — an optional custom name for the rule, shown in the settings heading in place of the frontmatter key when set
 - **Frontmatter key** — the key it supplies values for, e.g. `Status`
 - **Values** — comma-separated; blanks are dropped and duplicates removed
 - **Scope** — Folder, DropdownClass, or File
 - **Pattern** — the regex or exact literal for that scope
-- **Enable toggle**, plus ↑ ↓ reorder and delete
+- **Enable toggle**, plus ↑ ↓ reorder, copy, and delete
+
+The copy button duplicates a rule — key, values, scope, and label — directly beneath it with a fresh internal id, handy for building near-identical rules across scopes.
 
 One global option, **Case-insensitive keys**, controls frontmatter *key* matching only. Suggestion filtering is always case-insensitive; folder, file, and `DropdownClass` matching are always case-sensitive.
 
