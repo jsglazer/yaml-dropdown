@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 
 import { compileFolderPattern } from "./core/scope";
 import { formatValueList, parseValueList } from "./core/values";
-import { moveRule, newRule } from "./core/settings";
+import { duplicateRule, moveRule, newRule } from "./core/settings";
 import type { Rule, ScopeType } from "./core/settings";
 import type YamlDropdownPlugin from "./main";
 
@@ -108,8 +108,10 @@ export class YamlDropdownSettingTab extends PluginSettingTab {
 	private renderRule(containerEl: HTMLElement, rule: Rule, index: number): void {
 		const ruleEl = containerEl.createDiv({ cls: "yaml-dropdown-rule" });
 
+		const heading = rule.label.length > 0 ? rule.label : rule.key.length > 0 ? rule.key : "(no key)";
+
 		new Setting(ruleEl)
-			.setName(rule.key.length > 0 ? rule.key : "(no key)")
+			.setName(heading)
 			.setDesc(`${SCOPE_LABELS[rule.scope.type]} — ${rule.values.length} value(s)`)
 			.setHeading()
 			.addToggle((toggle) =>
@@ -145,12 +147,35 @@ export class YamlDropdownSettingTab extends PluginSettingTab {
 			)
 			.addExtraButton((button) =>
 				button
+					.setIcon("copy")
+					.setTooltip("Copy rule")
+					.onClick(async () => {
+						this.plugin.settings.rules = duplicateRule(this.plugin.settings.rules, index);
+						await this.plugin.saveSettings();
+						this.display();
+					}),
+			)
+			.addExtraButton((button) =>
+				button
 					.setIcon("trash")
 					.setTooltip("Delete rule")
 					.onClick(async () => {
 						this.plugin.settings.rules.splice(index, 1);
 						await this.plugin.saveSettings();
 						this.display();
+					}),
+			);
+
+		new Setting(ruleEl)
+			.setName("Label")
+			.setDesc("Optional custom name for this rule, shown above instead of the frontmatter key.")
+			.addText((text) =>
+				text
+					.setPlaceholder("e.g. Book status")
+					.setValue(rule.label)
+					.onChange(async (value) => {
+						rule.label = value.trim();
+						await this.plugin.saveSettings();
 					}),
 			);
 

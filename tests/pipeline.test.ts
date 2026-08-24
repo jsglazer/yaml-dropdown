@@ -40,6 +40,7 @@ function run(doc: string, filePath: string, line: number, ch: number, rules: rea
 
 const folderRule: Rule = {
 	id: "rule-1",
+	label: "",
 	key: "Status",
 	values: ["Open", "In progress", "Done"],
 	scope: { type: "folder", pattern: "^Projects" },
@@ -48,6 +49,7 @@ const folderRule: Rule = {
 
 const classRule: Rule = {
 	id: "rule-2",
+	label: "",
 	key: "Status",
 	values: ["To read", "Reading", "Read"],
 	scope: { type: "class", pattern: "Book" },
@@ -135,6 +137,7 @@ describe("core pipeline", () => {
 	it("a file-scoped rule overrides both class and folder rules", () => {
 		const fileRule: Rule = {
 			id: "rule-3",
+			label: "",
 			key: "Status",
 			values: ["Shipped"],
 			scope: { type: "file", pattern: "Projects/Alpha/Note.md" },

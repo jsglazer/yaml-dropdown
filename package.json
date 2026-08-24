@@ -1,6 +1,6 @@
 {
 	"name": "yaml-dropdown",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Dropdown suggestions for frontmatter values in Obsidian, scoped per folder, per file, or by DropdownClass.",
 	"main": "main.js",
 	"scripts": {

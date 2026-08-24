@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	SCHEMA_VERSION,
 	defaultSettings,
+	duplicateRule,
 	moveRule,
 	newRule,
 	nextRuleId,
@@ -13,6 +14,7 @@ import type { Rule } from "../src/core/settings";
 
 const validRule = {
 	id: "rule-1",
+	label: "",
 	key: "Status",
 	values: ["Open", "Done"],
 	scope: { type: "folder", pattern: "^Projects" },
@@ -96,6 +98,16 @@ describe("normalizeRule", () => {
 	it("rejects a rule with no id", () => {
 		expect(normalizeRule({ ...validRule, id: "" })).toBeNull();
 	});
+
+	it("keeps a string label", () => {
+		expect(normalizeRule({ ...validRule, label: "Book status" })?.label).toBe("Book status");
+	});
+
+	it("defaults a missing or non-string label to an empty string", () => {
+		const { label, ...withoutLabel } = validRule;
+		expect(normalizeRule(withoutLabel)?.label).toBe("");
+		expect(normalizeRule({ ...validRule, label: 42 })?.label).toBe("");
+	});
 });
 
 describe("nextRuleId", () => {
@@ -119,9 +131,10 @@ describe("nextRuleId", () => {
 });
 
 describe("newRule", () => {
-	it("starts enabled, scoped to folder, with no values", () => {
+	it("starts enabled, scoped to folder, with no values or label", () => {
 		expect(newRule([])).toEqual({
 			id: "rule-1",
+			label: "",
 			key: "",
 			values: [],
 			scope: { type: "folder", pattern: "" },
@@ -154,5 +167,36 @@ describe("moveRule", () => {
 	it("does not mutate the input array", () => {
 		moveRule(rules, 1, -1);
 		expect(ids(rules)).toEqual(["a", "b", "c"]);
+	});
+});
+
+describe("duplicateRule", () => {
+	const rules = ["a", "b"].map((id) => ({ ...validRule, id })) as Rule[];
+	const ids = (list: Rule[]) => list.map((rule) => rule.id);
+
+	it("inserts a copy directly after the source with a fresh id", () => {
+		expect(ids(duplicateRule(rules, 0))).toEqual(["a", "rule-1", "b"]);
+	});
+
+	it("copies the source rule's fields", () => {
+		const copy = duplicateRule(rules, 0)[1];
+		expect(copy).toEqual({ ...validRule, id: "rule-1" });
+	});
+
+	it("is independent of the source rule's scope and values", () => {
+		const [source, copy] = [rules[0], duplicateRule(rules, 0)[1]];
+		copy.scope.pattern = "changed";
+		copy.values.push("changed");
+		expect(source.scope.pattern).toBe("^Projects");
+		expect(source.values).toEqual(["Open", "Done"]);
+	});
+
+	it("is a no-op for an out-of-range index", () => {
+		expect(ids(duplicateRule(rules, 9))).toEqual(["a", "b"]);
+	});
+
+	it("does not mutate the input array", () => {
+		duplicateRule(rules, 0);
+		expect(ids(rules)).toEqual(["a", "b"]);
 	});
 });

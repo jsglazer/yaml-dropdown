@@ -14,6 +14,8 @@ export interface RuleScope {
 
 export interface Rule {
 	id: string;
+	/** Optional user-supplied name for this rule, shown in place of the key when set. */
+	label: string;
 	/** The frontmatter key this rule supplies values for. */
 	key: string;
 	/** Parsed value list. The raw comma-separated string is never persisted. */
@@ -80,6 +82,7 @@ export function normalizeRule(raw: unknown): Rule | null {
 
 	return {
 		id: raw.id,
+		label: typeof raw.label === "string" ? raw.label : "",
 		key: raw.key,
 		values,
 		scope: { type, pattern: raw.scope.pattern },
@@ -105,11 +108,30 @@ export function nextRuleId(existingIds: readonly string[]): string {
 export function newRule(existingIds: readonly string[]): Rule {
 	return {
 		id: nextRuleId(existingIds),
+		label: "",
 		key: "",
 		values: [],
 		scope: { type: "folder", pattern: "" },
 		enabled: true,
 	};
+}
+
+/**
+ * Copy the rule at `index`, inserting the copy directly after it with a fresh id.
+ * Returns a new array; out-of-range is a no-op.
+ */
+export function duplicateRule(rules: readonly Rule[], index: number): Rule[] {
+	if (index < 0 || index >= rules.length) return rules.slice();
+	const source = rules[index];
+	const copy: Rule = {
+		...source,
+		id: nextRuleId(rules.map((rule) => rule.id)),
+		scope: { ...source.scope },
+		values: source.values.slice(),
+	};
+	const next = rules.slice();
+	next.splice(index + 1, 0, copy);
+	return next;
 }
 
 /** Move the rule at `index` by `offset` places. Returns a new array; out-of-range is a no-op. */

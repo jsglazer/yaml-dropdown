@@ -393,6 +393,7 @@ function normalizeRule(raw) {
   }
   return {
     id: raw.id,
+    label: typeof raw.label === "string" ? raw.label : "",
     key: raw.key,
     values,
     scope: { type, pattern: raw.scope.pattern },
@@ -412,11 +413,25 @@ function nextRuleId(existingIds) {
 function newRule(existingIds) {
   return {
     id: nextRuleId(existingIds),
+    label: "",
     key: "",
     values: [],
     scope: { type: "folder", pattern: "" },
     enabled: true
   };
+}
+function duplicateRule(rules, index) {
+  if (index < 0 || index >= rules.length) return rules.slice();
+  const source = rules[index];
+  const copy = {
+    ...source,
+    id: nextRuleId(rules.map((rule) => rule.id)),
+    scope: { ...source.scope },
+    values: source.values.slice()
+  };
+  const next = rules.slice();
+  next.splice(index + 1, 0, copy);
+  return next;
 }
 function moveRule(rules, index, offset) {
   const next = rules.slice();
@@ -509,7 +524,8 @@ var YamlDropdownSettingTab = class extends import_obsidian2.PluginSettingTab {
   }
   renderRule(containerEl, rule, index) {
     const ruleEl = containerEl.createDiv({ cls: "yaml-dropdown-rule" });
-    new import_obsidian2.Setting(ruleEl).setName(rule.key.length > 0 ? rule.key : "(no key)").setDesc(`${SCOPE_LABELS[rule.scope.type]} \u2014 ${rule.values.length} value(s)`).setHeading().addToggle(
+    const heading = rule.label.length > 0 ? rule.label : rule.key.length > 0 ? rule.key : "(no key)";
+    new import_obsidian2.Setting(ruleEl).setName(heading).setDesc(`${SCOPE_LABELS[rule.scope.type]} \u2014 ${rule.values.length} value(s)`).setHeading().addToggle(
       (toggle) => toggle.setValue(rule.enabled).setTooltip("Enable this rule").onChange(async (value) => {
         rule.enabled = value;
         await this.plugin.saveSettings();
@@ -527,10 +543,22 @@ var YamlDropdownSettingTab = class extends import_obsidian2.PluginSettingTab {
         this.display();
       })
     ).addExtraButton(
+      (button) => button.setIcon("copy").setTooltip("Copy rule").onClick(async () => {
+        this.plugin.settings.rules = duplicateRule(this.plugin.settings.rules, index);
+        await this.plugin.saveSettings();
+        this.display();
+      })
+    ).addExtraButton(
       (button) => button.setIcon("trash").setTooltip("Delete rule").onClick(async () => {
         this.plugin.settings.rules.splice(index, 1);
         await this.plugin.saveSettings();
         this.display();
+      })
+    );
+    new import_obsidian2.Setting(ruleEl).setName("Label").setDesc("Optional custom name for this rule, shown above instead of the frontmatter key.").addText(
+      (text) => text.setPlaceholder("e.g. Book status").setValue(rule.label).onChange(async (value) => {
+        rule.label = value.trim();
+        await this.plugin.saveSettings();
       })
     );
     new import_obsidian2.Setting(ruleEl).setName("Frontmatter key").setDesc("The key this rule supplies values for, e.g. Status.").addText(

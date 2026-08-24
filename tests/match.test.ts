@@ -14,7 +14,7 @@ function rule(
 	enabled = true,
 ): Rule {
 	idCounter += 1;
-	return { id: `rule-${idCounter}`, key, values, scope: { type, pattern }, enabled };
+	return { id: `rule-${idCounter}`, label: "", key, values, scope: { type, pattern }, enabled };
 }
 
 function context(overrides: Partial<MatchContext> = {}): MatchContext {
